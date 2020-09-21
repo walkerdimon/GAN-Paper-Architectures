@@ -1,2 +1,2 @@
 # GAN-projects
-Implementing GAN research architectures into personal code (PyTorch)
+Implementing GAN paper architectures into personal code (PyTorch)
