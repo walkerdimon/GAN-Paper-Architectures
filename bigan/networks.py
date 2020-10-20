@@ -18,11 +18,11 @@ class Generator(nn.Module):
 
         self.normalization = nn.BatchNorm2d()
 
-        self.conv1 = nn.Conv2d(in_channels=256, out_channels=128, kernel_size=5, stride=1, padding=2, bias=True) #4x4 --> 8x8
+        self.deconv1 = nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=3, stride=2, padding=1, bias=True) #4x4 --> 7x7
 
-        self.conv2 = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=5, stride=1, padding=2, bias=True) #8x8 --> 16x16
+        self.deconv2 = nn.ConvTranspose2d(in_channels=128, out_channels=64, kernel_size=3, stride=2, bias=True) #7x7 --> 15x15
 
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=3, kernel_size=5, stride=1, padding=2, bias=True) #16x16 --> 32x32
+        self.deconv3 = nn.ConvTranspose2d(in_channels=64, out_channels=3, kernel_size=4, stride=2, bias=True) #15x15 --> 32x32
 
 
     def forward(self, z):
@@ -31,21 +31,16 @@ class Generator(nn.Module):
         x = self.Activation(x)
         
         x = x.view(x.size(0), 256, 4, 4)
-        x = F.interpolate(x, scale_factor=2, mode='nearest')
 
-        x = self.conv1(x)
+        x = self.deconv1(x)
         x = self.Activation(x)
-        x = F.interpolate(x, scale_factor=2, mode='nearest')
         x = self.normalization(128)
 
-        x = self.conv2(x)
+        x = self.deconv2(x)
         x = self.Activation(x)
-        x = F.interpolate(x, scale_factor=2, mode='nearest')
         x = self.normalization(64)
 
-        x = self.conv3(x)
-        x = self.Activation(x)
-
+        x = self.deconv3(x)
         x = torch.tanh(x)
 
         return x

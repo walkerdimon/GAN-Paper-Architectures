@@ -23,15 +23,22 @@ def main():
     bigan = BiGAN(args)
 
     #load the data
+    load_training_data = torch.load('./data/CIFAR10/processed/training_processed.pt')
+    training_data = DataLoader(load_training_data, batch_size=args.batch_size=, shuffle=True)
 
     #run training
     for epoch in range(args.epochs):
         print(f"Training Epoch{epoch+1}/{args.epochs}")
 
-        bigan.train(data.cuda())
+        for data, labels in training_data:
+
+            if len(data) == args.batch_size:
+
+                #train generator, encoder, and discriminator
+                bigan.train(data.cuda())
 
 
-    #save your model
+                #save model
 
     #results??
 

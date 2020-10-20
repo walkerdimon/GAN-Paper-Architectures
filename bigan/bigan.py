@@ -19,6 +19,7 @@ class BiGAN(object):
         self.decay_rate = args.decay_rate
         self.learning_rate = args.learning_rate
         self.model_name = args.model_name
+        self.batch_size = args.batch_size
 
         #initialize networks
         self.Generator = Generator(self.z_dim).cuda()
@@ -42,27 +43,35 @@ class BiGAN(object):
         self.Encoder.train()
         self.Discriminator.train()
 
-        self.Generator.zero_grad()
-        self.Encoder.zero_grad()
-        self.Discriminator.zero_grad()
+        self.optimizer_G_E.zero_grad()
+        self.optimizer_D.zero_grad()
 
 
-        #get fake z_dim for generator
+        #get fake z_data for generator
+        self.z_fake = torch.randn((self.batch_size, self.z_dim))
         
-        #get fake data from generator to send through discriminator
+        #send fake z_data through generator to get fake x_data
+        self.x_fake = self.Generator(self.z_fake.detach())
 
-        #get real x_dim for encoder
-
-        #get real z_dim from encoder to send through discriminator
+        #send real data through encoder to get real z_data
+        self.z_real = self.Encoder(data)
 
         #send real x and z data into discriminator
+        self.out_real = self.Discriminator(data, z_real.detach())
 
         #send fake x and z data into discriminator
+        self.out_fake = self.Discriminator(x_fake.detach(), z_fake.detach())
 
         #compute discriminator loss
+        self.D_loss = nn.BCELoss()
 
         #compute generator/encoder loss
+        self.G_E_loss = nn.BCELoss()
 
         #compute discriminator gradiants and backpropogate 
+        self.D_loss.backward()
+        self.optimizer_D.step()
 
         #compute generator/encoder gradiants and backpropogate
+        self.G_E_loss.backward()
+        self.optimizer_G_E.step()
